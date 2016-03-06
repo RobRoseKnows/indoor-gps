@@ -36,11 +36,31 @@ public class TrainingContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static Uri buildSignalLocation(String loc) {
-            return CONTENT_URI.buildUpon().appendPath(loc).build();
+        public static Uri buildTrainingLocation(String loc) {
+            return CONTENT_URI.buildUpon().appendPath(COLUMN_LOCATION).appendPath(loc).build();
+        }
+
+        public static Uri buildTrainingMac(String mac) {
+            return CONTENT_URI.buildUpon().appendPath(COLUMN_MAC).appendPath(mac).build();
+        }
+        
+        public static Uri buildTrainingIndiv(String loc, String mac) {
+            return CONTENT_URI.buildUpon().appendPath(loc).appendPath(mac).build();
         }
 
         public static String getLocationFromUri(Uri uri) {
+            return uri.getPathSegments().get(2);
+        }
+
+        public static String getMacFromUri(Uri uri) {
+            return uri.getPathSegments().get(2);
+        }
+
+        public static String getLocationInIndivQueryFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+        }
+
+        public static String getMacInIndivQueryFromUri(Uri uri) {
             return uri.getPathSegments().get(2);
         }
     }

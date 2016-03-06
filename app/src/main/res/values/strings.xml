@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">IndoorGps</string>
+    <string name="content_authority">io.robrose.hack.indoorgps</string>
 </resources>

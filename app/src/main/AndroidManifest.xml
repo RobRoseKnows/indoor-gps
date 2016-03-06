@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.robrose.hack.indoorgps">
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,5 +19,11 @@
             </intent-filter>
         </activity>
     </application>
+
+    <provider
+        android:authorities="@string/content_authority"
+        android:name=".data.TrainingProvider"
+        android:exported="false"
+        android:syncable="true" />
 
 </manifest>

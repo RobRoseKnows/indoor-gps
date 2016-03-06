@@ -12,11 +12,11 @@ import android.net.Uri;
 /**
  * Created by Robert on 3/5/2016.
  */
-public class SignalProvider extends ContentProvider{
+public class TrainingProvider extends ContentProvider{
     // The URI Matcher used by this content provider.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private TrainingDbHelper mOpenHelper;
-    private static final SQLiteQueryBuilder sGetSignalByLocationQueryBuilder = new SQLiteQueryBuilder();
+    private static final SQLiteQueryBuilder sQueryBuilder = new SQLiteQueryBuilder();
 
     // Get ALL the things!
     static final int TRAINING = 100;
@@ -25,7 +25,7 @@ public class SignalProvider extends ContentProvider{
     // Get all data points with the same MAC address.
     static final int TRAINING_MAC = 102;
     // Get the individual data point at a provided location and MAC address
-    static final int TRAINING_INDV = 103;
+    static final int TRAINING_INDIV = 103;
     
     //signal.location = ?
     private static final String sLocationSelection =
@@ -47,7 +47,40 @@ public class SignalProvider extends ContentProvider{
         String selection = sLocationSelection;
         String[] selectionArgs = new String[]{location};
 
-        return sGetSignalByLocationQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+        return sQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
+
+    private Cursor getTrainingByMac(Uri uri, String[] projection, String sortOrder) {
+        String mac = TrainingContract.TrainingEntry.getMacFromUri(uri);
+
+        String selection = sMacSelection;
+        String[] selectionArgs = new String[]{mac};
+
+        return sQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
+
+    private Cursor getTrainingIndiv(Uri uri, String[] projection, String sortOrder) {
+        String location = TrainingContract.TrainingEntry.getLocationInIndivQueryFromUri(uri);
+        String mac = TrainingContract.TrainingEntry.getMacInIndivQueryFromUri(uri);
+
+        String selection = sIndividualSelection;
+        String[] selectionArgs = new String[]{location, mac};
+
+        return sQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 selection,
                 selectionArgs,
@@ -67,7 +100,7 @@ public class SignalProvider extends ContentProvider{
                 TrainingContract.TrainingEntry.COLUMN_LOCATION + "/*", TRAINING_LOCATION);
         matcher.addURI(authority, TrainingContract.PATH_TRAINING + "/" +
                 TrainingContract.TrainingEntry.COLUMN_MAC + "/*", TRAINING_MAC);
-        matcher.addURI(authority, TrainingContract.PATH_TRAINING + "/*/*", TRAINING_INDV);
+        matcher.addURI(authority, TrainingContract.PATH_TRAINING + "/*/*", TRAINING_INDIV);
 
         return matcher;
     }
@@ -96,7 +129,7 @@ public class SignalProvider extends ContentProvider{
                 return TrainingContract.TrainingEntry.CONTENT_TYPE;
             case TRAINING_MAC:
                 return TrainingContract.TrainingEntry.CONTENT_TYPE;
-            case TRAINING_INDV:
+            case TRAINING_INDIV:
                 return TrainingContract.TrainingEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -110,7 +143,7 @@ public class SignalProvider extends ContentProvider{
         // and query the database accordingly.
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
-            // "signal"
+            // training
             case TRAINING: {
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         TrainingContract.TrainingEntry.TABLE_NAME,
@@ -124,9 +157,21 @@ public class SignalProvider extends ContentProvider{
                 break;
             }
 
-            // "signal/*"
+            // training/location/*
             case TRAINING_LOCATION: {
                 retCursor = getTrainingByLocation(uri, projection, sortOrder);
+                break;
+            }
+
+            // training/mac/*
+            case TRAINING_MAC: {
+                retCursor = getTrainingByMac(uri, projection, sortOrder);
+                break;
+            }
+
+            // training/*/*
+            case TRAINING_INDIV: {
+                retCursor = getTrainingIndiv(uri, projection, sortOrder);
                 break;
             }
 
