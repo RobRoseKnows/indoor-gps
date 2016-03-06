@@ -18,12 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.TrainingProvider" />
     </application>
 
-    <provider
-        android:authorities="@string/content_authority"
-        android:name=".data.TrainingProvider"
-        android:exported="false"
-        android:syncable="true" />
 
 </manifest>

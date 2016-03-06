@@ -5,6 +5,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.robrose.hack.indoorgps.data.TrainingContract;
 
 public class MainActivity extends AppCompatActivity {
@@ -51,17 +53,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        wifiManager=(WifiManager)getSystemService(Context.WIFI_SERVICE);
+        scanReceiver = new ScanReceiver();
         populateDatabase();
     }
 
+    protected void onResume() {
+        registerReceiver(scanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        super.onResume();
+    }
+
+    protected void onPause() {
+        unregisterReceiver(scanReceiver);
+        super.onPause();
+    }
+
     @Bind(R.id.locationTextView) TextView locationTextView;
+    @OnClick(R.id.checkLocationButton) void onLocationButtonClick() {
+        wifiManager.startScan();
+    }
 
     private void populateDatabase() throws SQLiteConstraintException {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(getAssets().open("averages.csv")));
 
             String line = "";
-            ArrayList<ContentValues> contentsList = new ArrayList<>();
+            List<ContentValues> contentsList = new ArrayList<>();
             while ((line = in.readLine()) != null){
                 String[] rowData = line.split(",");
                 String location = rowData[0];
@@ -85,8 +102,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            ContentValues[] valueArray = (ContentValues[]) contentsList.toArray();
-            getContentResolver().bulkInsert(TrainingContract.BASE_CONTENT_URI, valueArray);
+            ContentValues[] valueArray = new ContentValues[contentsList.size()];
+            for(int i = 0; i < contentsList.size(); i++)
+                valueArray[i] = contentsList.get(i);
+
+            getContentResolver().bulkInsert(TrainingContract.TrainingEntry.CONTENT_URI, valueArray);
             in.close();
         } catch (IOException e) {
             Log.e(LOG_TAG, "CSV didn't load correctly");
