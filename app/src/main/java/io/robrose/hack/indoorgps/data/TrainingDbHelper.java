@@ -29,7 +29,7 @@ public class TrainingDbHelper extends SQLiteOpenHelper {
                     TrainingEntry.COLUMN_STD_DEV + " REAL NOT NULL, " +
                     TrainingEntry.COLUMN_SAMPLE + " INTEGER NOT NULL, UNIQUE( " +
                     TrainingEntry.COLUMN_LOCATION + ", " +
-                    TrainingEntry.COLUMN_MAC + ") ON CONFLICT FAIL" +
+                    TrainingEntry.COLUMN_MAC + ") ON CONFLICT REPLACE" +
                     " );";
 
             sqLiteDatabase.execSQL(SQL_CREATE_SIGNAL_TABLE);

@@ -64,4 +64,10 @@ public class TrainingContract {
             return uri.getPathSegments().get(2);
         }
     }
+
+    public static final class SignalEntry implements BaseColumns {
+        public static final String COLUMN_MAC = "mac";
+        // The signal strength in dBm
+        public static final String COLUMN_STRENGTH = "strength";
+    }
 }
